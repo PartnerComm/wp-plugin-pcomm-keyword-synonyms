@@ -1,0 +1,17 @@
+{
+    "name": "pcomm/keywordsynonyms",
+    "version": "1.0.0",
+    "description": "PComm Keyword Synonyms",
+    "type": "wordpress-plugin",
+    "dist": {
+        "type": "git",
+        "url": "https://partnercomm.git.beanstalkapp.com/wp-plugin-pcomm-keyword-synonyms.git"
+    },
+    "authors": [
+        {
+            "name": "Partnercomm.net",
+            "email": "code@partnercomm.net"
+        }
+    ],
+    "require": {}
+}
