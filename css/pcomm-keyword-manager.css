@@ -28,3 +28,8 @@
 	color: #a8a8a8;
 	font-size: 1.2em;
 }
+
+/* override this style in the theme if you want parent terms to show up in the search suggestions*/
+.suggest_parent{
+	display:none;
+}

@@ -22,7 +22,7 @@ add_action('admin_menu', 'pckm_add_page', 11);
 add_action('admin_init', 'pckm_admin_init');
 
 // CSS and Scripts
-add_action('admin_enqueue_scripts', 'pckm_enqueue_styles', 12);
+add_action('wp_enqueue_scripts', 'pckm_enqueue_styles', 12);
 add_action('admin_enqueue_scripts', 'pckm_enqueue_scripts');
 
 // Scripts for front-end

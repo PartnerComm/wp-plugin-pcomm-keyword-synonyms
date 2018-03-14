@@ -12,8 +12,16 @@ var qf_autocomplete = (function($, w) {
 
 				filter: function (keywords) {
 					return $.map(keywords, function (keyword) {
+
+                        if(keyword.synonym === keyword.parent_name){
+                            var displayValue = removeSlashes(keyword.synonym);
+                        }else{
+                            var displayValue = removeSlashes(keyword.synonym) + '<span class="suggest_parent"> in ' + removeSlashes(keyword.parent_name) + '</span>';
+                        }
+
 						return {
-							value: removeSlashes(keyword.synonym),
+                            value: removeSlashes(keyword.synonym),
+                            display_value: displayValue,
 							term_id: keyword.term_id,
 							child_name: removeSlashes(keyword.term_name),
 							child_slug: keyword.term_slug,
@@ -219,7 +227,7 @@ var qf_autocomplete = (function($, w) {
 						console.log(data);
 						return 'Nothing';
 					},
-					suggestion: Handlebars.compile("<div data-score='{{sort_score}}' data-slug='{{child_slug}}' data-value='{{value}}'><p>{{value}}</p></div>") //,
+                    suggestion: Handlebars.compile("<div data-score='{{sort_score}}' data-slug='{{child_slug}}' data-value='{{value}}'><p>{{{display_value}}}</p></div>") //,
 					// footer: Handlebars.compile("<strong>Searched for '{{query}}'</strong>")
 				}
 
