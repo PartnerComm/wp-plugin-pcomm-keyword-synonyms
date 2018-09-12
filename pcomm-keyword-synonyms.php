@@ -75,6 +75,122 @@ function pckm_install()
 }
 
 // ********************************************************************************************
+// ******************************** WEIGHTED SEARCH *******************************************
+register_activation_hook(__FILE__, 'pckm_wsearch_install');
+add_action('wp_ajax_pckm_save_search', 'pckm_save_search');
+add_action('wp_ajax_nopriv_pckm_save_search', 'pckm_save_search');
+add_action('rest_api_init', 'pckm_register_api_route');
+
+
+function pckm_wsearch_install()
+{
+    global $wpdb;
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+    $tablename = $wpdb->prefix . "pcomm_wsearch";
+
+    $sql = "CREATE TABLE `$tablename` (
+	  `uid` int(11) NOT NULL AUTO_INCREMENT,
+	  `search_term` varchar(255) NOT NULL,
+	  `synonym_clicked` int(11) NOT NULL,
+	  `click_count` int(11) NOT NULL,
+	  PRIMARY KEY (`uid`)
+	);";
+
+    dbDelta($sql);
+}
+
+function pckm_save_search()
+{
+    global $wpdb;
+
+    $wsearch_tablename = $wpdb->prefix . "pcomm_wsearch";
+    $synonym_tablename = $wpdb->prefix . "pcomm_synonyms";
+
+    $search_data = $_POST['searchData'];
+    $synonym =  $search_data['syn'];
+    $term_slug = $search_data['childslug'];
+    $user_typed = $search_data['userTyped'];
+
+    //lookup the ID for the clicked synonym
+
+    $synonym_lookup_query = "SELECT uid FROM $synonym_tablename WHERE synonym = %s AND term_slug = %s";
+
+    var_dump($synonym_lookup_query);
+
+    $synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
+
+    var_dump($synonym_id);
+
+    //does this search/synonym record already exist?
+    $search_query = "SELECT * FROM $wsearch_tablename WHERE synonym_clicked = %d AND search_term = %s";
+
+    $search_record = $wpdb->get_row($wpdb->prepare($search_query, $synonym_id, $user_typed));
+
+    if($search_record){ //There is a record for the search/synonym already, let's bump up the counter
+
+        $new_count = $search_record->click_count +1;
+        $wpdb->update($wsearch_tablename, array('click_count'=>$new_count), array('uid'=>$search_record->uid));
+
+    }else{
+
+        $data = array(
+            'search_term' => $user_typed,
+            'synonym_clicked' => $synonym_id,
+            'click_count' => 1,
+        );
+        $wpdb->insert($wsearch_tablename, $data);
+    }
+
+    var_dump($user_typed);
+
+    wp_die();
+}
+
+function pckm_register_api_route()
+{
+    register_rest_route('pcqf/v1', '/synsearch/', array(
+        'methods' => 'GET',
+        'callback' => 'pckm_get_synonyms_and_searches',
+    ));
+}
+
+function pckm_get_synonyms_and_searches() {
+    global $wpdb;
+
+    $search_table = $wpdb->prefix . 'pcomm_wsearch';
+    $syns_table = $wpdb->prefix . 'pcomm_synonyms';
+
+    $syns = $wpdb->get_results("
+        SELECT *
+        FROM $syns_table
+        "
+    );
+
+    foreach($syns as $syn){
+
+        $searches = $wpdb->get_results(
+            "
+        SELECT search_term, click_count
+        FROM $search_table
+        WHERE `synonym_clicked` = $syn->uid 
+        ORDER BY click_count DESC
+        LIMIT 5
+        ");
+
+        $term_search_history = array();
+
+        foreach($searches as $search){
+            $term_search_history[$search->search_term] = $search->click_count;
+        }
+
+        $syn->searches = $term_search_history;
+    }
+
+    return $syns;
+}
+
+// ********************************************************************************************
 // ******************************** ADMIN PAGES AND SETTINGS **********************************
 
 // Add admin page
