@@ -29,7 +29,8 @@ var qf_autocomplete = (function($, w) {
                             child_slug: keyword.term_slug,
                             parent_slug: keyword.parent_slug,
                             parent_name: removeSlashes(keyword.parent_name),
-                            sticky: keyword.sticky
+							sticky: keyword.sticky,
+							searches: keyword.searches
                         };
                     });
                 }
@@ -40,7 +41,6 @@ var qf_autocomplete = (function($, w) {
 
                 filter: function (keywords) {
                     return $.map(keywords, function (keyword) {
-                        //console.log(keyword);
                         return {
                             value: removeSlashes(keyword.synonym),
                             term_id: keyword.term_id,
@@ -48,7 +48,8 @@ var qf_autocomplete = (function($, w) {
                             child_slug: keyword.term_slug,
                             parent_slug: keyword.parent_slug,
                             parent_name: removeSlashes(keyword.parent_name),
-                            sticky: keyword.sticky
+							sticky: keyword.sticky,
+							searches: keyword.searches
                         };
                     });
                 }
@@ -57,9 +58,11 @@ var qf_autocomplete = (function($, w) {
             sufficient: 0,
 
             sorter: function(a, b) {
+				// console.log(a);
+				// console.log(b);
                 // start a timer to see how long this takes
-                // console.time("Sort results");
-
+				// console.time("Sort results");
+			
                 // get the input value from typeahead
                 var input_array = $('.typeahead.tt-input').val().toLowerCase().split(' '),
 
@@ -102,8 +105,8 @@ var qf_autocomplete = (function($, w) {
                     // we'll subtract the index of subsequent words from here to diminish their score
                     // didn't want to start with 5 in the event that some synonyms have more than 5 words (creating a 0 or negative score for words beyond the 5th
                     // could be any reasonably high arbitrary number but 10 should be enough
-                    top_word_score = 10;
-
+					top_word_score = 10;
+					
 
                 // testing alt method of getting scores, using input array instead of word array
                 // get longest length of a result
@@ -152,17 +155,44 @@ var qf_autocomplete = (function($, w) {
                 // sticky setting to force to top of autocomplete is added to a term in the keyword synonyms manager
                 // add the sticky value to the a word score if it exists
                 if (a.sticky !== null) {
-                    a_words_scores.push(a.sticky * 10);
+                    a_words_scores.push(a.sticky * 100);
                 }
 
                 // add the sticky value to the b word score if it exists
                 if (b.sticky !== null) {
-                    b_words_scores.push(b.sticky * 10);
-                }
+                    b_words_scores.push(b.sticky * 100);
+				}
+				
+				//userTyped = input_array;
+				userTyped = $('.typeahead.tt-input').val().toLowerCase();
 
+				var weighted_result_previous_search_multiplier = 0;
+				var a_previous_search_match_terms = Object.keys( a.searches );
+				var a_previous_search_match = a_previous_search_match_terms.indexOf( userTyped );
+				
+				if ( a_previous_search_match > -1 ) {
+					// we found an exact match, so add a multiplier based on the number of times it's been searched
+					weighted_result_previous_search_multiplier = Object.values( a.searches )[a_previous_search_match];
+					a_words_scores.push(weighted_result_previous_search_multiplier * 10);
+					// console.info('added last value of this array to a_words_scores', a_words_scores);
+				}
+
+				var b_previous_search_match_terms = Object.keys( b.searches );
+				var b_previous_search_match = b_previous_search_match_terms.indexOf( userTyped );
+				
+				if ( b_previous_search_match > -1 ) {
+					// we found an exact match, so add a multiplier based on the number of times it's been searched
+					weighted_result_previous_search_multiplier = Object.values( b.searches )[b_previous_search_match];
+					b_words_scores.push(weighted_result_previous_search_multiplier * 10);
+					// console.info('added last value of this array to b_words_scores', b_words_scores);
+				}
+
+				weighted_result_previous_search_multiplier = 0;
                 // get total scores for a and b
                 // probably a more elegant way to do this
-                var total_a_score = 0
+				var total_a_score = 0
+				
+				
                 // iterate over the scores in the array
                 // and add them together
                 $.each(a_words_scores, function() {
@@ -176,7 +206,12 @@ var qf_autocomplete = (function($, w) {
                 });
 
                 a.sort_score = total_a_score;
-                b.sort_score = total_b_score;
+				b.sort_score = total_b_score;
+				
+				// console.table(a);
+				// console.info('a.sort_score for ' + userTyped, a.sort_score);
+				// console.table(b);
+				// console.info('b.sort_score for ' + userTyped, b.sort_score);
 
                 // LOG DATA TO CONSOLE FOR DEBUGGING PURPOSES
                 //console.group("Sorter data for '%s' vs '%s' with user input of '%s'", a.value, b.value, input_array.join(' '));
@@ -187,10 +222,7 @@ var qf_autocomplete = (function($, w) {
                 //console.groupEnd();
 
                 // end timer to see how long this function took for each sort
-                // console.timeEnd("Sort results");
-
-                //userTyped = input_array;
-                userTyped = $('.typeahead.tt-input').val().toLowerCase();
+				// console.timeEnd('Sort results');
 
                 if ( total_a_score > total_b_score ) {
                     return -1;
@@ -407,18 +439,18 @@ var qf_autocomplete = (function($, w) {
     function logSearchWeight(keys){
         //this function is intended to log user search terms and selections to the db.
         var testData = JSON.stringify(keys, null, 4);
-        alert('KEYS: ' + testData);
+        // console.info('Keys to be saved to database', testData);
 
         $.ajax({
             type: 'POST',
-            url: ajaxurl,
+            url: pckm_ajax.ajaxurl,
             data : {
                 action : 'pckm_save_search',
                 searchData : keys
             },
 
             success: function (response) {
-                alert('SAVED SEARCH CLICK! ' + response)
+                // console.info('Response when saving search to database,', response);
             }
         });
 
