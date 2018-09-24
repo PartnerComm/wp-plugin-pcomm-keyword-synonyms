@@ -116,11 +116,7 @@ function pckm_save_search()
 
     $synonym_lookup_query = "SELECT uid FROM $synonym_tablename WHERE synonym = %s AND term_slug = %s";
 
-    var_dump($synonym_lookup_query);
-
-    $synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
-
-    var_dump($synonym_id);
+	$synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
 
     //does this search/synonym record already exist?
     $search_query = "SELECT * FROM $wsearch_tablename WHERE synonym_clicked = %d AND search_term = %s";
@@ -141,8 +137,6 @@ function pckm_save_search()
         );
         $wpdb->insert($wsearch_tablename, $data);
     }
-
-    var_dump($user_typed);
 
     wp_die();
 }
