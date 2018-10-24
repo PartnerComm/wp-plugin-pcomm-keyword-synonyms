@@ -4,5 +4,7 @@ This plugin manages the keywords and synonyms for a Quick Find, including the fr
 
 ### Changelog
 
+* 1.0.3
+    * wpdb->prepare should have only two arguments
 * 1.0.2
 	* Save text typed by user when a search result is selected, and use that data to sort results, giving preference to results that a user has selected previously when typing that search phrase.

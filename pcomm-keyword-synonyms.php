@@ -116,12 +116,12 @@ function pckm_save_search()
 
     $synonym_lookup_query = "SELECT uid FROM $synonym_tablename WHERE synonym = %s AND term_slug = %s";
 
-	$synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
+	$synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, array($synonym, $term_slug)));
 
     //does this search/synonym record already exist?
     $search_query = "SELECT * FROM $wsearch_tablename WHERE synonym_clicked = %d AND search_term = %s";
 
-    $search_record = $wpdb->get_row($wpdb->prepare($search_query, $synonym_id, $user_typed));
+    $search_record = $wpdb->get_row($wpdb->prepare($search_query, array($synonym_id, $user_typed)));
 
     if($search_record){ //There is a record for the search/synonym already, let's bump up the counter
 
@@ -652,6 +652,3 @@ function pckm_autocomplete_search()
 
     die();
 }
-
-
-?>
