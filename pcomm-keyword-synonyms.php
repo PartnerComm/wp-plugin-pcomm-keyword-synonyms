@@ -3,7 +3,7 @@
 Plugin Name: PComm Keyword Synonym Manager
 Plugin URI: http://www.pcommsites.com
 Description: This plugin manages the keywords and synonyms for a Quick Find, including the front end typeahead search interface, and saving of searches typed by users and including that data in weighting of results.
-Version: 1.0.3
+Version: 1.0.5
 Author: PartnerComm
 Author URI:
 */
