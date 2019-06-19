@@ -5,7 +5,7 @@ Plugin URI: http://www.pcommsites.com
 Description: This plugin manages the keywords and synonyms for a Quick Find, including the front end typeahead search interface, and saving of searches typed by users and including that data in weighting of results.
 Version: 1.0.3
 Author: PartnerComm
-Author URI: 
+Author URI:
 */
 
 /********** CONSTANTS ************/
@@ -116,20 +116,18 @@ function pckm_save_search()
 
     $synonym_lookup_query = "SELECT uid FROM $synonym_tablename WHERE synonym = %s AND term_slug = %s";
 
-	$synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
+    $synonym_id = $wpdb->get_var($wpdb->prepare($synonym_lookup_query, $synonym, $term_slug));
 
     //does this search/synonym record already exist?
     $search_query = "SELECT * FROM $wsearch_tablename WHERE synonym_clicked = %d AND search_term = %s";
 
     $search_record = $wpdb->get_row($wpdb->prepare($search_query, $synonym_id, $user_typed));
 
-    if($search_record){ //There is a record for the search/synonym already, let's bump up the counter
+    if ($search_record) { //There is a record for the search/synonym already, let's bump up the counter
 
         $new_count = $search_record->click_count +1;
         $wpdb->update($wsearch_tablename, array('click_count'=>$new_count), array('uid'=>$search_record->uid));
-
-    }else{
-
+    } else {
         $data = array(
             'search_term' => $user_typed,
             'synonym_clicked' => $synonym_id,
@@ -149,20 +147,21 @@ function pckm_register_api_route()
     ));
 }
 
-function pckm_get_synonyms_and_searches() {
+function pckm_get_synonyms_and_searches()
+{
     global $wpdb;
 
     $search_table = $wpdb->prefix . 'pcomm_wsearch';
     $syns_table = $wpdb->prefix . 'pcomm_synonyms';
 
-    $syns = $wpdb->get_results("
+    $syns = $wpdb->get_results(
+        "
         SELECT *
         FROM $syns_table
         "
     );
 
-    foreach($syns as $syn){
-
+    foreach ($syns as $syn) {
         $searches = $wpdb->get_results(
             "
         SELECT search_term, click_count
@@ -170,11 +169,12 @@ function pckm_get_synonyms_and_searches() {
         WHERE `synonym_clicked` = $syn->uid 
         ORDER BY click_count DESC
         LIMIT 5
-        ");
+        "
+        );
 
         $term_search_history = array();
 
-        foreach($searches as $search){
+        foreach ($searches as $search) {
             $term_search_history[$search->search_term] = $search->click_count;
         }
 
@@ -192,8 +192,14 @@ function pckm_add_page()
 {
     //add_options_page('PComm Keyword Synonyms', 'PComm Keyword Synonyms', 'manage_options', __FILE__, 'pckm_options_page');
     add_submenu_page('pcomm-quick-find', 'Keyword Synonyms', 'Keyword Synonyms', 'edit_others_posts', 'keyword-synonyms', 'pckm_options_page');
+    add_filter('option_page_capability_pckm_options', 'pckm_options_capability');
 }
+function pckm_options_capability() {
 
+    $manage_options_cap = 'edit_others_posts';
+
+    return $manage_options_cap;
+}
 // Add Javascript
 function pckm_enqueue_scripts()
 {
@@ -373,18 +379,15 @@ function pckm_delete_terms()
         $del_syns = $_POST['synonyms'];
 
         foreach ($del_syns as $dsyn) {
-
             $wpdb->query(
                 $wpdb->prepare(
                     "
 			     DELETE FROM $tablename
 					 WHERE uid = %d
 					",
-
                     $dsyn
                 )
             );
-
         }
     }
 
@@ -415,9 +418,7 @@ function pckm_set_sticky()
                 array($sticky, $term_id)
             )
         );
-
     } else {
-
         $wpdb->query(
             $wpdb->prepare(
                 "
@@ -466,7 +467,6 @@ function pckm_current_term_form($term_id)
         foreach ($syns as $syn) {
             $html .= '<li><input type="checkbox" id="synonym_' . $syn->uid . '" name="synonyms[]" value="' . $syn->uid . '" />';
             $html .= '<label for="synonym_' . $syn->uid . '">' . $syn->synonym . '</label></li>';
-
         }
         $html .= '</ul>';
         $html .= '</td></tr></tbody></table>
@@ -546,9 +546,7 @@ function pckm_update_synonym_on_term_edit($term_id)
                 $args
             )
         );
-
     }
-
 }
 
 // Primary Ajax method of for autocomplete suggestions
@@ -646,7 +644,6 @@ function pckm_autocomplete_search()
             }
 
             echo $html;
-
         }
     }
 
