@@ -125,8 +125,8 @@ function pckm_save_search()
 
     if ($search_record) { //There is a record for the search/synonym already, let's bump up the counter
 
-        $new_count = $search_record->click_count +1;
-        $wpdb->update($wsearch_tablename, array('click_count'=>$new_count), array('uid'=>$search_record->uid));
+        $new_count = $search_record->click_count + 1;
+        $wpdb->update($wsearch_tablename, array('click_count' => $new_count), array('uid' => $search_record->uid));
     } else {
         $data = array(
             'search_term' => $user_typed,
@@ -194,7 +194,8 @@ function pckm_add_page()
     add_submenu_page('pcomm-quick-find', 'Keyword Synonyms', 'Keyword Synonyms', 'edit_others_posts', 'keyword-synonyms', 'pckm_options_page');
     add_filter('option_page_capability_pckm_options', 'pckm_options_capability');
 }
-function pckm_options_capability() {
+function pckm_options_capability()
+{
 
     $manage_options_cap = 'edit_others_posts';
 
@@ -203,8 +204,8 @@ function pckm_options_capability() {
 // Add Javascript
 function pckm_enqueue_scripts()
 {
-    wp_enqueue_script('pckm-js', PCKMURL . '/js/pcomm-keyword-manager.js', array('jquery'));
-    wp_localize_script('pckm-js', 'pckm_ajax', array('ajaxurl' => admin_url('admin-ajax.php')));
+    wp_enqueue_script('pckm-admin-js', PCKMURL . '/js/pcomm-keyword-manager.js', array('jquery'));
+    wp_localize_script('pckm-admin-js', 'pckm_ajax', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 
 function pckm_enqueue_frontend_scripts()
@@ -226,7 +227,7 @@ function pckm_enqueue_styles()
 // Options page render form
 function pckm_options_page()
 {
-    ?>
+?>
 
     <div class="wrap">
         <?php screen_icon(); ?>
@@ -234,7 +235,7 @@ function pckm_options_page()
         <form action="options.php" method="post">
             <?php settings_fields('pckm_options'); ?>
             <?php do_settings_sections(__FILE__); ?>
-            <p class="submit"><input name="Submit" class="button-primary" type="submit" value="Save New Synonyms"/></p>
+            <p class="submit"><input name="Submit" class="button-primary" type="submit" value="Save New Synonyms" /></p>
 
         </form>
 
@@ -243,7 +244,7 @@ function pckm_options_page()
 
     </div>
 
-    <?php
+<?php
 }
 
 // Define settings
@@ -575,14 +576,14 @@ function pckm_autocomplete_search()
             // )); b
 
             $results = $wpdb->get_results($wpdb->prepare(
-            // "
-            // SELECT *,
-            // MATCH(synonym) AGAINST('$user_input*') AS relevance
-            // FROM wp_pcomm_synonyms
-            // WHERE MATCH(synonym) AGAINST('*$user_input*' IN BOOLEAN MODE)
-            // HAVING relevance > 0.2
-            // ORDER BY relevance DESC
-            // "
+                // "
+                // SELECT *,
+                // MATCH(synonym) AGAINST('$user_input*') AS relevance
+                // FROM wp_pcomm_synonyms
+                // WHERE MATCH(synonym) AGAINST('*$user_input*' IN BOOLEAN MODE)
+                // HAVING relevance > 0.2
+                // ORDER BY relevance DESC
+                // "
 
                 "
 			SELECT *,
@@ -598,14 +599,14 @@ function pckm_autocomplete_search()
 			LIMIT 13
 			"
 
-            // "
-            // SELECT *,
-            // MATCH(synonym,parent_name) AS relevance
-            // FROM wp_pcomm_synonyms
-            // WHERE MATCH(synonym)
-            // AGAINST('*$user_input*' IN BOOLEAN MODE)
-            // ORDER BY relevance DESC
-            // "
+                // "
+                // SELECT *,
+                // MATCH(synonym,parent_name) AS relevance
+                // FROM wp_pcomm_synonyms
+                // WHERE MATCH(synonym)
+                // AGAINST('*$user_input*' IN BOOLEAN MODE)
+                // ORDER BY relevance DESC
+                // "
 
             ));
 
