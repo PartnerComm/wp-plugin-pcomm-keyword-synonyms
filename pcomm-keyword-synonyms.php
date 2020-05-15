@@ -221,7 +221,7 @@ function pckm_enqueue_frontend_scripts()
 // Add CSS
 function pckm_enqueue_styles()
 {
-    wp_enqueue_style('pckm-style', plugins_url('/css/pcomm-keyword-manager.css' __FILE__), array(), '');
+    wp_enqueue_style('pckm-style', plugins_url('/css/pcomm-keyword-manager.css', __FILE__), array(), '');
 }
 
 // Options page render form
